@@ -1,4 +1,4 @@
-# REMEMBER TO CREDIT THE SERVER FOR CREATING THE SOUNDFONTS
+# Make sure to credit discord.gg/JF6qMX3tTZ for anything you use!
 
 My Singing Monsters soundfonts
 
