@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="assets/icon.png">
     <title>Soundfont Browser</title>
     <style>
         :root {
@@ -63,6 +64,35 @@
 
         .search-bar:focus {
             box-shadow: 0 0 20px rgba(92, 219, 149, 0.2);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            background: var(--card-bg);
+            border: none;
+            border-radius: 5px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: var(--background);
+        }
+
+        .tab:hover {
+            background: var(--hover);
+        }
+
+        .tab.active:hover {
+            background: var(--accent);
         }
 
         main {
@@ -165,14 +195,47 @@
             margin-top: 2rem;
             grid-column: 1 / -1;
         }
+
+        .readme-content {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem;
+            line-height: 1.8;
+        }
+
+        .readme-content h1, 
+        .readme-content h2, 
+        .readme-content h3 {
+            color: var(--accent);
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .readme-content p {
+            margin-bottom: 1rem;
+        }
+
+        .readme-content a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .readme-content a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="search-container">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('sf2')">Soundfonts</button>
+                <button class="tab" onclick="switchTab('dwp')">Direct Wave</button>
+                <button class="tab" onclick="switchTab('info')">Info</button>
+            </div>
             <input type="text" 
                    class="search-bar" 
-                   placeholder="Search soundfonts..." 
+                   placeholder="Search..." 
                    id="search"
                    autocomplete="off">
         </div>
@@ -180,146 +243,156 @@
 
     <main id="mainContent">
         <div class="loading">
-            Loading soundfonts...
+            Loading...
             <div>Make sure to credit discord.gg/JF6qMX3tTZ for soundfonts you use!</div>
         </div>
     </main>
 
     <script>
-        let soundfontData = {
-            root: [],
-            folders: {}
-        };
+        let currentTab = 'sf2';
+        let soundfontData = { root: [], folders: {} };
+        let dwpData = { root: [], folders: {} };
+        let readmeContent = '';
 
         function getRepoInfoFromUrl() {
             const url = window.location.href;
-            let match;
-            
-            match = url.match(/\/\/([^.]+)\.github\.io\/([^/]+)/);
-            if (match) {
-                return { user: match[1], repo: match[2] };
-            }
+            let match = url.match(/\/\/([^.]+)\.github\.io\/([^/]+)/);
+            if (match) return { user: match[1], repo: match[2] };
             
             match = url.match(/\/\/github\.io\/([^/]+)/);
-            if (match) {
-                return { user: match[1], repo: match[1] + '.github.io' };
-            }
+            if (match) return { user: match[1], repo: match[1] + '.github.io' };
             
-            return { 
-                user: 'testingaccforrandomcrap', 
-                repo: 'soundfonts.github.io' 
-            };
+            return { user: 'testingaccforrandomcrap', repo: 'soundfonts.github.io' };
         }
+
+        async function fetchReadme() {
+            const { user, repo } = getRepoInfoFromUrl();
+            try {
+                const response = await fetch(`https://api.github.com/repos/${user}/${repo}/readme`);
+                const data = await response.json();
+                if (response.ok) {
+                    readmeContent = atob(data.content);
+                }
+            } catch (error) {
+                readmeContent = 'Failed to load readme.';
+            }
+        }
+
         async function fetchRepoContents() {
             const { user, repo } = getRepoInfoFromUrl();
             
             try {
-                const response = await fetch(`https://api.github.com/repos/${user}/${repo}/git/trees/main?recursive=1`);
-                const data = await response.json();
+                const [repoResponse, readmeResponse] = await Promise.all([
+                    fetch(`https://api.github.com/repos/${user}/${repo}/git/trees/main?recursive=1`),
+                    fetch(`https://api.github.com/repos/${user}/${repo}/readme`)
+                ]);
+
+                const repoData = await repoResponse.json();
+                const readmeData = await readmeResponse.json();
                 
-                if (!response.ok) {
-                    throw new Error(data.message || 'Failed to fetch repository contents');
+                if (!repoResponse.ok) throw new Error(repoData.message || 'Failed to fetch repository contents');
+
+                if (readmeResponse.ok) {
+                    readmeContent = atob(readmeData.content);
                 }
 
-                data.tree.forEach(item => {
-                    if (!item.path.startsWith('soundfonts/') || !item.path.endsWith('.sf2')) {
-                        return;
-                    }
-
-                    const parts = item.path.split('/');
-                    
-                    if (parts.length === 2) {
-                        soundfontData.root.push({ filename: parts[1] });
-                    } else if (parts.length === 3) {
-                        const folder = parts[1];
-                        if (!soundfontData.folders[folder]) {
-                            soundfontData.folders[folder] = [];
-                        }
-                        soundfontData.folders[folder].push({ filename: parts[2] });
+                repoData.tree.forEach(item => {
+                    if (item.path.startsWith('soundfonts/') && item.path.endsWith('.sf2')) {
+                        processFile(item.path, soundfontData, '.sf2');
+                    } else if (item.path.startsWith('dwp/') && item.path.endsWith('.dwp')) {
+                        processFile(item.path, dwpData, '.dwp');
                     }
                 });
 
-                renderAllSoundfonts();
-
+                renderContent();
             } catch (error) {
                 document.getElementById('mainContent').innerHTML = `
-                    <div class="error">
-                        Error loading soundfonts: ${error.message}<br>
-                        Please make sure the repository and soundfonts folder exist,<br>
-                        and that GitHub Pages is properly set up.
-                    </div>
-                `;
+                    <div class="error">Error loading files: ${error.message}</div>`;
             }
         }
 
-        function createSoundfontCard(soundfont, folder = "") {
-            const name = soundfont.filename.replace('.sf2', '');
-            const path = folder 
-                ? `📁 soundfonts/${folder}/${soundfont.filename}`
-                : `📁 soundfonts/${soundfont.filename}`;
+        function processFile(path, data, ext) {
+            const parts = path.split('/');
+            if (parts.length === 2) {
+                data.root.push({ filename: parts[1] });
+            } else if (parts.length === 3) {
+                const folder = parts[1];
+                if (!data.folders[folder]) data.folders[folder] = [];
+                data.folders[folder].push({ filename: parts[2] });
+            }
+        }
 
+        function createFileCard(file, folder = "") {
+            const name = file.filename.replace(/\.(sf2|dwp)$/, '');
+            const baseFolder = currentTab === 'sf2' ? 'soundfonts' : 'dwp';
+            const path = folder ? `📁 ${baseFolder}/${folder}/${file.filename}` : `📁 ${baseFolder}/${file.filename}`;
+            
             const { user, repo } = getRepoInfoFromUrl();
-            const downloadUrl = `https://raw.githubusercontent.com/${user}/${repo}/main/soundfonts/${folder ? folder + '/' : ''}${soundfont.filename}`;
+            const downloadUrl = `https://raw.githubusercontent.com/${user}/${repo}/main/${baseFolder}/${folder ? folder + '/' : ''}${file.filename}`;
 
             return `
                 <div class="soundfont-card">
                     <div class="soundfont-name">${name}</div>
                     <div class="soundfont-path">${path}</div>
-                    <a href="${downloadUrl}" 
-                       class="download-btn" 
-                       target="_blank">
-                       Download
-                    </a>
+                    <a href="${downloadUrl}" class="download-btn" target="_blank">Download</a>
                 </div>
             `;
         }
 
-        function renderFolderSection(title, soundfonts, folder = "") {
+        function renderFolderSection(title, files, folder = "") {
             return `
                 <div class="folder-section">
                     <h2 class="folder-title">📁 ${title}</h2>
                     <div class="soundfont-grid">
-                        ${soundfonts.map(sf => createSoundfontCard(sf, folder)).join('')}
+                        ${files.map(f => createFileCard(f, folder)).join('')}
                     </div>
                 </div>
             `;
         }
 
-        function renderAllSoundfonts(query = '') {
-            const mainContent = document.getElementById('mainContent');
+        function renderFiles(query = '') {
+            const data = currentTab === 'sf2' ? soundfontData : dwpData;
             let content = '';
 
-            const filterSoundfont = sf => 
-                sf.filename.toLowerCase().replace('.sf2', '').includes(query.toLowerCase());
+            const filterFile = f => f.filename.toLowerCase().replace(/\.(sf2|dwp)$/, '').includes(query.toLowerCase());
 
-            // First render root ("My Singing Monsters")
-            const filteredRoot = soundfontData.root.filter(filterSoundfont);
+            const filteredRoot = data.root.filter(filterFile);
             if (filteredRoot.length > 0) {
                 content += renderFolderSection("My Singing Monsters", filteredRoot);
             }
 
-            const folders = Object.entries(soundfontData.folders)
-                .sort(([a], [b]) => a.localeCompare(b));
-
-            folders.forEach(([folderName, soundfonts]) => {
-                const filteredSoundfonts = soundfonts.filter(filterSoundfont);
-                if (filteredSoundfonts.length > 0) {
-                    content += renderFolderSection(folderName, filteredSoundfonts, folderName);
+            const folders = Object.entries(data.folders).sort(([a], [b]) => a.localeCompare(b));
+            folders.forEach(([folderName, files]) => {
+                const filteredFiles = files.filter(filterFile);
+                if (filteredFiles.length > 0) {
+                    content += renderFolderSection(folderName, filteredFiles, folderName);
                 }
             });
 
-            if (!content) {
-                content = '<div class="no-results">No soundfonts found</div>';
-            }
-
-            mainContent.innerHTML = content;
+            return content || '<div class="no-results">No files found</div>';
         }
 
-        const searchInput = document.getElementById('search');
-        searchInput.addEventListener('input', (e) => {
-            renderAllSoundfonts(e.target.value);
-        });
+        function renderContent(query = '') {
+            const mainContent = document.getElementById('mainContent');
+            if (currentTab === 'info') {
+                mainContent.innerHTML = `<div class="readme-content">${readmeContent}</div>`;
+            } else {
+                mainContent.innerHTML = renderFiles(query);
+            }
+        }
 
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+            
+            const searchBar = document.getElementById('search');
+            searchBar.style.display = tab === 'info' ? 'none' : 'block';
+            
+            renderContent(searchBar.value);
+        }
+
+        document.getElementById('search').addEventListener('input', e => renderContent(e.target.value));
         fetchRepoContents();
     </script>
 </body>
