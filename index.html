@@ -363,8 +363,10 @@
         async function fetchNotes() {
             const { user, repo } = getRepoInfoFromUrl();
             try {
-                const response = await fetch(`https://github.com/${user}/${repo}/raw/main/assets/notes.json`);
-                if (response.ok) notesData = await response.json();
+                const response = await fetch(`https://raw.githubusercontent.com/${user}/${repo}/main/assets/notes.json`);
+                if (response.ok) {
+                    notesData = await response.json();
+                }
             } catch (error) {
                 console.log('Notes file not found or invalid');
             }
