@@ -93,25 +93,24 @@ main.fade-out {opacity:0;}
 <script>
 let currentTab='sf2';let soundfontData={root:[],folders:{}};let dwpData={root:[],folders:{}};let readmeContent='';
 
-// Define the order of monster classes
 const monsterClassOrder = [
-    'Natural',
-    'Fire',
-    'Magical',
-    'Ethereal',
-    'Supernatural',
-    'Superethereal',
-    'Legendary',
-    'Shugafam',
+    'Naturals',
+    'Fires',
+    'Magicals',
+    'Ethereals',
+    'Supernaturals',
+    'Superethereals',
+    'Legendaries',
+    'Shugafams',
     'Werdos',
-    'Seasonal',
-    'Mythical',
-    'Celestial',
-    'Dipster',
-    'Titansoul',
-    'Spectral',
-    'Rare',
-    'Epic'
+    'Seasonals',
+    'Mythicals',
+    'Celestials',
+    'Dipsters',
+    'Titansouls',
+    'Spectrals',
+    'Rares',
+    'Epics'
 ];
 
 function getRepoInfoFromUrl(){const url=window.location.href;let match=url.match(/\/\/([^.]+)\.github\.io\/([^/]+)/);if(match)return{user:match[1],repo:match[2]};match=url.match(/\/\/github\.io\/([^/]+)/);if(match)return{user:match[1],repo:match[1]+'.github.io'};return{user:'kryvak',repo:'msm-soundfonts'};}
