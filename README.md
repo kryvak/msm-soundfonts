@@ -1,18 +1,29 @@
-# Make sure to credit discord.gg/JF6qMX3tTZ for anything you use!
+Make sure to credit [discord.gg/JF6qMX3tTZ](https://discord.gg/JF6qMX3tTZ) for anything you use!
 
-My Singing Monsters soundfonts
-
-Most of quibbles islands are either not found, or use 4.0 Bright Concert Grand from halion which there is an SF2 of already
-
-Yooreek is unfinished
-
-Bright Conert Grand
-The preset used for Cave Island Quibble, and both Loodvigg sounds
-High, Medium & Low velocities each have their own unique sound
-
-Standard Dry kit
-The preset used for many monsters
-High, Medium & Low velocities each have their own unique sound
-
-Boo'qwurm
-High, Medium & Low velocities each have their own unique sound
+To be created:
+drummidary
+blarret
+pinghound
+hawlo
+blowt
+roarick
+poppette
+plinkajou/carillong
+spytrap
+flasque
+pluckbill
+piplash
+gheegur/sox
+clavi gnat
+bonkers
+epic wubbox sax
+gloptic
+gob
+knurv
+sooza, uuduk
+tapricorn
+spunge
+pladdie
+fiddlement
+rooba
+buzzinga
