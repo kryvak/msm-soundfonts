@@ -13,7 +13,7 @@ spytrap
 flasque
 pluckbill
 piplash
-gheeghur/sox
+gheegur/sox
 clavi gnat
 bonkers
 epic wubbox sax
