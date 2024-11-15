@@ -94,6 +94,7 @@ main.fade-out {opacity:0;}
 let currentTab='sf2';let soundfontData={root:[],folders:{}};let dwpData={root:[],folders:{}};let readmeContent='';
 
 const monsterClassOrder = [
+    'Other',
     'Naturals',
     'Fires',
     'Magicals',
@@ -136,8 +137,6 @@ function sortFolders(folders) {
         const indexB = getFolderSortIndex(b);
         
         if (indexA === indexB) {
-            // If neither folder is in the monster class list or both are at the same position,
-            // sort alphabetically
             return a.localeCompare(b);
         }
         return indexA - indexB;
@@ -155,7 +154,6 @@ function renderFiles(query=''){
         content+=renderFolderSection("My Singing Monsters",filteredRoot);
     }
     
-    // Use the new sorting function
     const sortedFolders = sortFolders(data.folders);
     
     sortedFolders.forEach(([folderName,files])=>{
