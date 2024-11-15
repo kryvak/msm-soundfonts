@@ -1,7 +1,15 @@
 {
-    "4.0 Bright Concert Grand.sf2": "A preset used for Quibble, and both Loodvigg sounds. High, Medium & Low velocities each have their own unique sound",
+    "SOUNDFONTS":".sf2",
+
+    "4.0 Bright Concert Grand.sf2": "A preset used for Quibble, and both Loodvigg sounds. High, Medium & Low velocities each have their own unique sounds.",
     "Standard Dry Kit.sf2": "A preset used for many monsters, High, Medium & Low velocities each have their own unique sounds.",
     "Quibble.sf2": "Most of quibbles islands are either not found, or use 4.0 Bright Concert Grand.",
     "Yooreek.sf2": "Partially unfinished.",
-    "Boo'qwurm.sf2": "High, Medium & Low velocities each have their own unique sounds."
+    "Boo'qwurm.sf2": "High, Medium & Low velocities each have their own unique sounds.",
+
+    
+    "DIRECT WAVE PRESETS":".dwp",
+
+    "Auglur (Alternative).dwp": "The current closest preset to Auglur.",
+    "Ghazt (The Monster World)": "Ghazts sound from the My Singing Monsters loading screen music."
 }
