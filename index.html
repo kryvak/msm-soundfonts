@@ -177,13 +177,17 @@
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 2rem;
             padding: 1rem;
+            grid-auto-rows: min-content; 
+            align-items: start;
         }
+
         .soundfont-card {
             background: rgba(255,255,255,0.1);
             border-radius: 15px;
             padding: 1.5rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            height: fit-content; 
         }
         .soundfont-card:hover {
             transform: translateY(-5px);
